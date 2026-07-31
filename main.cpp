@@ -156,6 +156,16 @@ static vector<string> splitKeywords(const string &s) {
     return keywords;
 }
 
+static bool keywordListValid(const vector<string> &keywords) {
+    if (keywords.empty()) return false;
+    set<string> uniq;
+    for (const auto &kw : keywords) {
+        if (kw.empty()) return false;
+        if (!uniq.insert(kw).second) return false;
+    }
+    return true;
+}
+
 static bool isDigits(const string &s) {
     return !s.empty() && all_of(s.begin(), s.end(), [](unsigned char c) { return isdigit(c); });
 }
@@ -556,7 +566,7 @@ private:
         if (!isLegalText(tokens[1], 20, true, true) || !isDigits(tokens[2])) return invalidRet();
         long long qty = 0;
         for (char c : tokens[2]) qty = qty * 10 + (c - '0');
-        if (qty <= 0) return invalidRet();
+        if (qty <= 0 || qty > 2147483647LL) return invalidRet();
         auto it = books.find(tokens[1]);
         if (it == books.end() || it->second.stock < qty) return invalidRet();
         it->second.stock -= static_cast<int>(qty);
@@ -605,9 +615,7 @@ private:
                 if (!seen.insert("keyword").second) return invalidRet();
                 if (!isLegalText(value, 60, false, true)) return invalidRet();
                 auto kws = splitKeywords(value);
-                if (kws.empty()) return invalidRet();
-                set<string> uniq(kws.begin(), kws.end());
-                if (uniq.size() != kws.size()) return invalidRet();
+                if (!keywordListValid(kws)) return invalidRet();
                 removeIndexes(*book);
                 book->keywords = std::move(kws);
                 addIndexes(*book);
@@ -700,6 +708,7 @@ private:
             if (!isDigits(tokens[2])) return invalidRet();
             long long cnt = 0;
             for (char c : tokens[2]) cnt = cnt * 10 + (c - '0');
+            if (cnt > 2147483647LL) return invalidRet();
             if (cnt == 0) {
                 cout << '\n';
                 recordSuccess("show finance");
