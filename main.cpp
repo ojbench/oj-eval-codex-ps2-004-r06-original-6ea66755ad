@@ -587,6 +587,7 @@ private:
                 old.isbn = value;
                 books[value] = old;
                 book = &books[value];
+                addIndexes(*book);
                 loginStack.back().selectedIsbn = value;
             } else if (parseQuotedOption(token, "-name=", value)) {
                 if (!seen.insert("name").second) return invalidRet();
